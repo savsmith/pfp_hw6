@@ -69,7 +69,7 @@ public:
 		}
 	}
 
-	void bellmanFord() {
+	void serialBellmanFord() {
 		initialize();
 		bool changed = true;
 
@@ -99,7 +99,7 @@ public:
 
 		__itt_pause(); //Stop measuring runtime here
 
-		printGraphDistances();
+		//printGraphDistances();
 	}
 
 	void printGraphDistances() {
@@ -133,7 +133,7 @@ int main (int argc, char *argv[]) {
 	
 	serialBellmanFord bf(g);
 	std::cout << "Graph size: " << g.size_nodes() << std::endl;
-	bf.bellmanFord();
+	bf.serialBellmanFord();
 
 	return 0;
 }

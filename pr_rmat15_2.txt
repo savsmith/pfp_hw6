@@ -1,0 +1,38 @@
+Graph Name: rmat15.dimacs
+
+Collection and Platform Info
+----------------------------
+Parameter                 r005hs                                                                                                                                                                                                                                                                                                                     
+------------------------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Application Command Line  ./parallelBF "inputs/rmat15.dimacs" "2"                                                                                                                                                                                                                                                                                    
+Operating System          4.4.0-121-generic NAME="Ubuntu"
+VERSION="16.04.4 LTS (Xenial Xerus)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 16.04.4 LTS"
+VERSION_ID="16.04"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+VERSION_CODENAME=xenial
+UBUNTU_CODENAME=xenial
+Computer Name             orcrist-29                                                                                                                                                                                                                                                                                                                 
+Result Size               3077080                                                                                                                                                                                                                                                                                                                    
+Collection start time     18:59:08 27/04/2018 UTC                                                                                                                                                                                                                                                                                                    
+Collection stop time      18:59:16 27/04/2018 UTC                                                                                                                                                                                                                                                                                                    
+Collector Type            User-mode sampling and tracing                                                                                                                                                                                                                                                                                             
+
+CPU
+---
+Parameter          r005hs                                        
+-----------------  ----------------------------------------------
+Name               Intel(R) Core(TM) Processor code named Nehalem
+Frequency          2393978693                                    
+Logical CPU Count  16                                            
+
+Summary
+-------
+Elapsed Time:       7.712 
+Paused Time:        0.461 
+CPU Time:           14.470
+Average CPU Usage:  1.998 

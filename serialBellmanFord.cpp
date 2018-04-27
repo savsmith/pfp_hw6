@@ -49,8 +49,8 @@ private:
 		}
 	}
 
-public:	
-	serialBellmanFord(graph &g): g(g) { 
+public:
+	serialBellmanFord(graph &g): g(g) {
 		distances = new int[g.size_nodes()];
 
 		string type = g.getGraphType();
@@ -69,7 +69,7 @@ public:
 		}
 	}
 
-	void serialBellmanFord() {
+	void bellmanFord() {
 		initialize();
 		bool changed = true;
 
@@ -124,16 +124,16 @@ int main (int argc, char *argv[]) {
   	}
 
 	// std::cout << "Starting Program" << std::endl;
-	
+
 	graph g; // Construct graph g from input
 	if(!g.construct_from_dimacs(argv[1])) {
 		return 0;
 	}
 	std::cout << "Graph Name: " << g.getName() << std::endl;
-	
+
 	serialBellmanFord bf(g);
 	std::cout << "Graph size: " << g.size_nodes() << std::endl;
-	bf.serialBellmanFord();
+	bf.bellmanFord();
 
 	return 0;
 }

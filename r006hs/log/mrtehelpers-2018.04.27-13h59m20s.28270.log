@@ -1,0 +1,5 @@
+408 [140294720993024] TRACE mrtehelpers.mrteenv <> - ENTER: virtual mrtehelpers_3_0::MrteEnvVarIterator mrtehelpers_3_0::MrteProfilingInitializer::getMrteProfilingEnvironment()
+408 [140294720993024] TRACE mrtehelpers.mrteenv <> - INTEL_MRTE_DATA_DIR=/tmp/amplxe-tmp-manasa/amplxe-res-28270-463530657947994/data.0/
+408 [140294720993024] TRACE mrtehelpers.mrteenv <> - INTEL_MRTE_HOST_NAME=orcrist-29
+408 [140294720993024] TRACE mrtehelpers.mrteenv <> - JAVA_TOOL_OPTIONS=-agentlib:amplxe_tpssmrte_javaprof_1.0 -Dsun.boot.library.path=/opt/intel/vtune_amplifier_2018.1.0.535340/lib32/runtime:/opt/intel/vtune_amplifier_2018.1.0.535340/lib64/runtime
+408 [140294720993024] TRACE mrtehelpers.mrteenv <> - EXIT:  virtual mrtehelpers_3_0::MrteEnvVarIterator mrtehelpers_3_0::MrteProfilingInitializer::getMrteProfilingEnvironment()

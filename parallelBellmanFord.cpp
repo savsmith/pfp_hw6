@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <limits>
 #include <atomic>
-#include <pthread.h> 
+#include <pthread.h>
 #include <vector>
 #include <time.h>
 #include "ittnotify.h" // header for VTune calls
@@ -16,7 +16,7 @@
 #include "graph.h"
 
 #define INT_MAX std::numeric_limits<int>::max()
-#define MAX_THREADS 512 
+#define MAX_THREADS 512
 
 enum SourceNode {
 	other = 4,
@@ -43,6 +43,23 @@ private:
 		}
 	}
 
+	bool converged(std::atomic<int> *distances, int arr[]) {
+			__itt_resume();
+			for(int n = g.begin(); n < g.end(); n++) {
+				if(distances[n].load() != arr[n]) {
+					return false;
+				}
+			}
+			__itt_pause();
+			return true;
+	}
+
+	void copy(std::atomic<int> *distances, int *arr) {
+		for(int n = g.begin(); n < g.end(); n++) {
+			arr[n] = distances[n].load();
+		}
+	}
+
 	void initialize() {
 		for(int n = g.begin(); n < g.end(); n++) {
 			distances[n].store(INT_MAX);
@@ -58,18 +75,17 @@ private:
 		}
 	}
 
-	bool relaxEdge(graph::node_t u, graph::node_t v, graph::edge_t e) {
+	void relaxEdge(graph::node_t u, graph::node_t v, graph::edge_t e) {
 		int newDist = distances[u].load() + g.get_edge_data(e);
 		if( distances[u].load() != INT_MAX && newDist < distances[v].load()) {
-			distances[v].store(newDist);
-			return true;
+			int current = distances[v].load();
+			int next = newDist;
+			while(!distances[v].compare_exchange_weak(current, next));
 		}
-		//cout << "** Edge not relaxed, changed bool == false **\n";
-		return false;
 	}
 
 public:
-	parallelBellmanFord(graph &g, int t): g(g), numThreads(t) { 
+	parallelBellmanFord(graph &g, int t): g(g), numThreads(t) {
 		distances = new std::atomic<int>[g.size_nodes()];
 
 		string type = g.getGraphType();
@@ -92,27 +108,17 @@ public:
 		//bool changed = true;
 		//cout << "My Id: " << myId << endl;
 		__itt_resume();
-		for(int i = 0 ; i < g.size_nodes() - 1; i++) {
 			//cout << "Iteration " << i << endl;
 			for(auto& u: nodes[myId%numThreads]) {
-				// if(!changed) {
-				// 	cout << "Breaking free\n";
-				// 	break;
-				// }
-				//changed = false;
 				for(auto e = g.edge_begin(u); e < g.edge_end(u); e++) {
 					graph::node_t v = g.get_edge_dst(e);
 					graph::edge_data_t weight = g.get_edge_data(e);
-					if(relaxEdge(u,v,e)) {
-						//cout << "Something changed\n";
-						//changed = true;
-					}
+					relaxEdge(u,v,e);
 				}
 			}
-		}
 		__itt_pause();
 		pthread_exit(NULL);
-		
+
 	}
 
 	static void* relax_wrapper(void* object)
@@ -122,34 +128,33 @@ public:
 	}
 
 	void bellmanFord(){
-		struct timespec tick, tock;         // for measuring runtime
-		uint64_t execTime;                  // time in nanoseconds
+		// struct timespec tick, tock;         // for measuring runtime
+		// uint64_t execTime;                  // time in nanoseconds
 		initialize();
 
 		int step = g.size_nodes()/numThreads;
 		int prev[g.size_nodes()];
-		//for(int roundNum = 1; roundNum < g.size_nodes(); roundNum++){
-			// dists(distances, prev);
-		clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
-			__itt_resume();
-			for(int i = 0; i < numThreads; ++i) {
-				//cout << "Creating Thread " << i << endl;
-				int rc = pthread_create(&handles[i], NULL, relax_wrapper, this);
+		for(int roundNum = 1; roundNum < g.size_nodes(); roundNum++){
+		 	copy(distances, prev);
+			// clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
+				__itt_resume();
+				for(int i = 0; i < numThreads; ++i) {
+					//cout << "Creating Thread " << i << endl;
+					int rc = pthread_create(&handles[i], NULL, relax_wrapper, this);
 			    if (rc) {
 			      std::cout << "Error:unable to create thread," << rc << std::endl;
 			      exit(-1);
 			    }
-			}
-
-			for(int i=0; i < numThreads; i++){
-	    		pthread_join(handles[i], NULL);
-	  		}
+				}
+				for(int i=0; i < numThreads; i++){
+		    		pthread_join(handles[i], NULL);
+		  	}
 	  		__itt_pause();
-	  		clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
-	  		execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
-	  		std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
-	  	//}
-  		//printGraphDistances();
+	  		// clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
+	  		// execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
+	  		// std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
+	  	}
+  		// printGraphDistances();
 	}
 
 	void printGraphDistances() {
@@ -175,13 +180,13 @@ int main (int argc, char *argv[]) {
   	}
 
 	// std::cout << "Starting Program" << std::endl;
-	
+
 	graph g; // Construct graph g from input
 	if(!g.construct_from_dimacs(argv[1])) {
 		return 0;
 	}
 	std::cout << "Graph Name: " << g.getName() << std::endl;
-	
+
 	parallelBellmanFord bf(g, atoi(argv[2]));
 
 	bf.bellmanFord();

@@ -1,0 +1,17 @@
+-r
+/v/filer5b/v38q001/manasa/Desktop/PFP/pfp_hw6/r000hs
+--stack-stitching
+--data-limit-mb=500
+--disk-space-limit=0
+--mrte-type=java,python
+--itt-config=frame
+--stackwalk=offline
+--mrte-mode=auto
+--type=cpu:counters:nostack
+--type=cpu:stack
+--interval=10
+--start-paused
+--
+./parallelBF
+inputs/wiki-example.dimacs
+1

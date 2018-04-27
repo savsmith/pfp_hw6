@@ -7,17 +7,25 @@ CC = g++
 CFLAGS = -std=c++14 -g
 LINKS = -lm
 DEPS = graph.h
-REMOVE_TARGETS = 
+REMOVE_TARGETS =
 
 all: graph \
-	 bf_a \
-	 bf_b \
-	 bf_c \
-	 bf_d \
-	 bf_e
+	 serial \
+	 parallel
+	 #bf_a \
+	 #bf_b \
+	 #bf_c \
+	 #bf_d \
+	 #bf_e
 
 graph: graph.cpp graph.h
 	$(CC) graph.cpp -O3 -std=c++11 -g -c -o graph.o -I/opt/intel/vtune_amplifier/include
+
+serial: graph.h graph.cpp serialBellmanFord.cpp
+	icc graph.o serialBellmanFord.cpp /opt/intel/vtune_amplifier/lib64/libittnotify.a -O3 -std=c++11 -g -pthread -o serialBF -lpthread -I/opt/intel/vtune_amplifier/include
+
+parallel: graph.h graph.cpp parallelBellmanFord.cpp
+	icc graph.o parallelBellmanFord.cpp /opt/intel/vtune_amplifier/lib64/libittnotify.a -O3 -std=c++11 -g -pthread -o parallelBF -lpthread -I/opt/intel/vtune_amplifier/include
 
 bf_a: graph.h graph.cpp
 	$(CC) graph.o bf_a.cpp /opt/intel/vtune_amplifier/lib64/libittnotify.a -O3 -std=c++11 -g -pthread -o bf_a -lpthread -I/opt/intel/vtune_amplifier/include
@@ -38,4 +46,3 @@ clean:
 	for f in $(REMOVE_TARGETS) ; do \
 		rm -f f; \
 	done
-

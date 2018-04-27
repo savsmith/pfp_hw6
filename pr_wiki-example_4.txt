@@ -1,0 +1,39 @@
+Graph Name: wiki-example.dimacs
+type assigned to other
+
+Collection and Platform Info
+----------------------------
+Parameter                 r009hs                                                                                                                                                                                                                                                                                                                     
+------------------------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Application Command Line  ./parallelBF "inputs/wiki-example.dimacs" "4"                                                                                                                                                                                                                                                                              
+Operating System          4.4.0-121-generic NAME="Ubuntu"
+VERSION="16.04.4 LTS (Xenial Xerus)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 16.04.4 LTS"
+VERSION_ID="16.04"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+VERSION_CODENAME=xenial
+UBUNTU_CODENAME=xenial
+Computer Name             orcrist-29                                                                                                                                                                                                                                                                                                                 
+Result Size               2829408                                                                                                                                                                                                                                                                                                                    
+Collection start time     19:03:50 27/04/2018 UTC                                                                                                                                                                                                                                                                                                    
+Collection stop time      19:03:50 27/04/2018 UTC                                                                                                                                                                                                                                                                                                    
+Collector Type            User-mode sampling and tracing                                                                                                                                                                                                                                                                                             
+
+CPU
+---
+Parameter          r009hs                                        
+-----------------  ----------------------------------------------
+Name               Intel(R) Core(TM) Processor code named Nehalem
+Frequency          2393980718                                    
+Logical CPU Count  16                                            
+
+Summary
+-------
+Elapsed Time:       0.118
+Paused Time:        0.080
+CPU Time:                
+Average CPU Usage:  0.0  

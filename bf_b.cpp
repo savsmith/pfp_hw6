@@ -7,6 +7,9 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <atomic>
+#include <omp.h>
+
 //#include "ittnotify.h" // header for VTune calls
 
 #include "graph.h"
@@ -23,20 +26,24 @@ enum SourceNode {
 class serialBellmanFord {
 	graph &g;
 	SourceNode src;
-	int *distances;
+	std::atomic<int> *distances;
 
 private:
+	void set(std::atomic<int> &container, int value){
+		auto current = container.load();
+		while(!container.compare_exchange_weak(current, value));
+	}
 	void initialize() {
 		for(int n = g.begin(); n < g.end(); n++) {
-			distances[n] = INT_MAX;
+			set(distances[n], INT_MAX);
 		}
-		distances[src] = 0;
+		set(distances[src], 0);
 	}
-
 	bool relaxEdge(graph::node_t u, graph::node_t v, graph::edge_t e) {
-		int newDist = distances[u] + g.get_edge_data(e);
-		if( distances[u] != INT_MAX && newDist < distances[v]) {
-			distances[v] = newDist;
+		int newDist = distances[u].load() + g.get_edge_data(e);
+		if(distances[u].load() != INT_MAX && newDist < distances[v].load()) {
+			set(distances[v], newDist);
+			//cout << "Setting node " << u << " to dist " << newDist << " correctly? ("<< (distances[u].load() == newDist) << ") " << endl;
 			return true;
 		}
 		//cout << "** Edge not relaxed, changed bool == false **\n";
@@ -51,7 +58,7 @@ private:
 
 public:	
 	serialBellmanFord(graph &g): g(g) { 
-		distances = new int[g.size_nodes()];
+		distances = new std::atomic<int>[g.size_nodes()];
 
 		string type = g.getGraphType();
 		if (type.compare("rmat") == 0) {
@@ -70,32 +77,47 @@ public:
 	}
 
 	void serialBF() {
+		struct timespec tick, tock;         // for measuring runtime
+		uint64_t execTime;                  // time in nanoseconds
 		initialize();
 		bool changed = true;
 
+		int numThreads = 4;
+		
 		//__itt_resume(); // Start measuring runtime here
+		clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
 
 		for(auto i = 0; i < g.size_nodes() - 1; i++) {
 			if(!changed) {
 				break;
 			}
 			changed = false;
-			for(auto u = g.begin(); u < g.end(); u++) {
-				//cout << "Node: " << u << endl;
-				for(auto e = g.edge_begin(u); e < g.edge_end(u); e++) {
-					//cout << "Edge: " << e << endl;
-					graph::node_t v = g.get_edge_dst(e);
-					graph::edge_data_t weight = g.get_edge_data(e);
-					if(relaxEdge(u,v,e)) {
-						changed = true;
+			
+			omp_set_num_threads(numThreads);
+			#pragma omp parallel
+			{
+				int myID = omp_get_thread_num();
+				for(auto u = g.begin()+(myID%numThreads); u < g.end(); u+=numThreads) {
+					//cout << "Node: " << u << endl;
+					for(auto e = g.edge_begin(u); e < g.edge_end(u); e++) {
+						//cout << "Edge: " << e << endl;
+						graph::node_t v = g.get_edge_dst(e);
+						graph::edge_data_t weight = g.get_edge_data(e);
+						if(relaxEdge(u,v,e)) {
+							changed = true;
+						}
 					}
 				}
 			}
 		}
 
 		//__itt_pause(); //Stop measuring runtime here
+		clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
+  		execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
+		
+  		std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
 
-		printGraphDistances();
+		//printGraphDistances();
 	}
 
 	void printGraphDistances() {

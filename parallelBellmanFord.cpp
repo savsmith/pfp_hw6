@@ -89,17 +89,12 @@ public:
 	}
 
 	void compute(int myId) {
-		//bool changed = true;
-		//cout << "My Id: " << myId << endl;
+		
 		__itt_resume();
 		for(int i = 0 ; i < g.size_nodes() - 1; i++) {
 			//cout << "Iteration " << i << endl;
 			for(auto& u: nodes[myId%numThreads]) {
-				// if(!changed) {
-				// 	cout << "Breaking free\n";
-				// 	break;
-				// }
-				//changed = false;
+
 				for(auto e = g.edge_begin(u); e < g.edge_end(u); e++) {
 					graph::node_t v = g.get_edge_dst(e);
 					graph::edge_data_t weight = g.get_edge_data(e);
@@ -128,28 +123,25 @@ public:
 
 		int step = g.size_nodes()/numThreads;
 		int prev[g.size_nodes()];
-		//for(int roundNum = 1; roundNum < g.size_nodes(); roundNum++){
-			// dists(distances, prev);
-		clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
-			__itt_resume();
-			for(int i = 0; i < numThreads; ++i) {
-				//cout << "Creating Thread " << i << endl;
-				int rc = pthread_create(&handles[i], NULL, relax_wrapper, this);
-			    if (rc) {
-			      std::cout << "Error:unable to create thread," << rc << std::endl;
-			      exit(-1);
-			    }
-			}
 
-			for(int i=0; i < numThreads; i++){
-	    		pthread_join(handles[i], NULL);
-	  		}
-	  		__itt_pause();
-	  		clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
-	  		execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
-	  		std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
-	  	//}
-  		//printGraphDistances();
+		clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
+		__itt_resume();
+		for(int i = 0; i < numThreads; ++i) {
+			int rc = pthread_create(&handles[i], NULL, relax_wrapper, this);
+		    if (rc) {
+		      std::cout << "Error:unable to create thread," << rc << std::endl;
+		      exit(-1);
+		    }
+		}
+
+		for(int i=0; i < numThreads; i++){
+    		pthread_join(handles[i], NULL);
+  		}
+  		__itt_pause();
+  		clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
+  		execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
+  		std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
+
 	}
 
 	void printGraphDistances() {

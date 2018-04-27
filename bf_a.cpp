@@ -29,16 +29,21 @@ class serialBellmanFord {
 	std::atomic<int> *distances;
 
 private:
+	void set(std::atomic<int> &container, int value){
+		auto current = container.load();
+		while(!container.compare_exchange_weak(current, value));
+	}
 	void initialize() {
 		for(int n = g.begin(); n < g.end(); n++) {
-			distances[n].store(INT_MAX);
+			set(distances[n], INT_MAX);
 		}
-		distances[src].store(0);
+		set(distances[src], 0);
 	}
 	bool relaxEdge(graph::node_t u, graph::node_t v, graph::edge_t e) {
 		int newDist = distances[u].load() + g.get_edge_data(e);
 		if(distances[u].load() != INT_MAX && newDist < distances[v].load()) {
-			distances[u].store(newDist);
+			set(distances[v], newDist);
+			//cout << "Setting node " << u << " to dist " << newDist << " correctly? ("<< (distances[u].load() == newDist) << ") " << endl;
 			return true;
 		}
 		//cout << "** Edge not relaxed, changed bool == false **\n";
@@ -96,15 +101,14 @@ public:
 					}
 				}
 			}
-			printGraphDistances();
 		}
 
 		//__itt_pause(); //Stop measuring runtime here
 		clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
   		execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
-  		//std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
+  		std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
 
-		printGraphDistances();
+		//printGraphDistances();
 	}
 
 	void printGraphDistances() {

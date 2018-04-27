@@ -10,7 +10,7 @@
 #include <atomic>
 #include <omp.h>
 
-//#include "ittnotify.h" // header for VTune calls
+#include "ittnotify.h" // header for VTune calls
 
 #include "graph.h"
 
@@ -27,6 +27,7 @@ class serialBellmanFord {
 	graph &g;
 	SourceNode src;
 	std::atomic<int> *distances;
+
 
 private:
 	void set(std::atomic<int> &container, int value){
@@ -76,48 +77,56 @@ public:
 		}
 	}
 
-	void serialBF() {
+	uint64_t serialBF(int numThreads, bool print) {
 		struct timespec tick, tock;         // for measuring runtime
 		uint64_t execTime;                  // time in nanoseconds
 		initialize();
-		bool changed = true;
-
-		int numThreads = 4;
+		bool changed[numThreads];
+		for(int i = 0; i < numThreads; i++)
+			changed[i] = true;
 		
-		//__itt_resume(); // Start measuring runtime here
-		clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
+		__itt_resume(); // Start measuring runtime here
+		//clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
 
+		
+		
+		omp_set_num_threads(numThreads);
 		for(auto i = 0; i < g.size_nodes() - 1; i++) {
-			if(!changed) {
-				break;
-			}
-			changed = false;
-			
-			omp_set_num_threads(numThreads);
 			#pragma omp parallel
 			{
 				int myID = omp_get_thread_num();
-				for(auto u = g.begin()+(myID%numThreads); u < g.end(); u+=numThreads) {
+				changed[myID] = false;
+				/* Execute Bellman Ford */
+				for(auto u = g.begin()+myID; u < g.end(); u+=numThreads) {
 					//cout << "Node: " << u << endl;
 					for(auto e = g.edge_begin(u); e < g.edge_end(u); e++) {
 						//cout << "Edge: " << e << endl;
 						graph::node_t v = g.get_edge_dst(e);
 						graph::edge_data_t weight = g.get_edge_data(e);
 						if(relaxEdge(u,v,e)) {
-							changed = true;
+							changed[myID] = true;
 						}
 					}
 				}
 			}
+			bool stop = true;
+			for(int i = 0; i < numThreads; i++){
+				if(changed[i])
+					stop = false;
+			}
+			if(stop)
+				break;
 		}
 
-		//__itt_pause(); //Stop measuring runtime here
-		clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
-  		execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
+		__itt_pause(); //Stop measuring runtime here
+		//clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
+  		//execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
 		
-  		std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
+		if (print)
+			printGraphDistances();
 
-		//printGraphDistances();
+		return execTime;
+
 	}
 
 	void printGraphDistances() {
@@ -135,8 +144,8 @@ public:
 
 int main (int argc, char *argv[]) {
 	// Ensure right number of arguments being used
-	if (argc < 2) {
-	    std::cerr << "Usage: " << argv[0] << " <input.dimacs>\n";
+	if (argc < 4) {
+	    std::cerr << "Usage: " << argv[0] << " <input.dimacs> <thread_count> <print 0/1>\n";
 	    return 0;
   	}
 
@@ -150,7 +159,9 @@ int main (int argc, char *argv[]) {
 	
 	serialBellmanFord bf(g);
 	//std::cout << "Graph size: " << g.size_nodes() << std::endl;
-	bf.serialBF();
+	uint64_t execTime = bf.serialBF(atoi(argv[2]), (bool)atoi(argv[3]));
+
+	std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
 
 	return 0;
 }

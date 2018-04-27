@@ -7,10 +7,10 @@ CC = icc
 CFLAGS = -std=c++11 -g -fopenmp -O3
 LINKS = -lm
 DEPS = graph.h
-#VTUNE_LINK = -I/opt/intel/vtune_amplifier/include
-#VTUNE = /opt/intel/vtune_amplifier/lib64/libittnotify.a
-VTUNE_LINK = 
-VTUNE = 
+VTUNE_LINK = -I/opt/intel/vtune_amplifier/include
+VTUNE = /opt/intel/vtune_amplifier/lib64/libittnotify.a
+#VTUNE_LINK = 
+#VTUNE = 
 REMOVE_TARGETS = bf_a bf_b bf_c bf_e bf_d
 
 all: graph \

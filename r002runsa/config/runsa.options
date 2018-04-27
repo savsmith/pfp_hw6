@@ -1,0 +1,16 @@
+-r
+/v/filer5b/v38q001/savannah/Desktop/Sp18/pfp/pfp_hw6/r002runsa
+--target=host
+--itt-config=frame
+--stack-stitching
+--data-limit-mb=500
+--disk-space-limit=0
+--mrte-type=java
+--mrte-mode=auto
+--stack-size=1024
+--start-paused
+--
+./bf_b
+inputs/rmat15
+4
+0

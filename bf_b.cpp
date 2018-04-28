@@ -86,7 +86,7 @@ public:
 			changed[i] = true;
 		
 		__itt_resume(); // Start measuring runtime here
-		clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
+		
 
 		
 		
@@ -94,6 +94,7 @@ public:
 
 		#pragma omp parallel
 		{
+			clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
 			for(auto i = 0; i < g.size_nodes() - 1; i++) {
 					int myID = omp_get_thread_num();
 					changed[myID] = false;
@@ -117,9 +118,9 @@ public:
 				if(stop)
 					break;
 			}
+			clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
+  			execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
 		}
-		clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
-  		execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
 		
 		if (print)
 			printGraphDistances();

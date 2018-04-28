@@ -72,7 +72,7 @@ public:
 			src = roadNY;
 			//cout << "type assigned to roadNY" << endl;
 		} else if (type.compare("other") == 0) {
-			cout << "type assigned to other" << endl;
+			//out << "type assigned to other" << endl;
 			src = other;
 		}
 	}
@@ -160,7 +160,7 @@ int main (int argc, char *argv[]) {
 	//std::cout << "Graph size: " << g.size_nodes() << std::endl;
 	uint64_t execTime = bf.serialBF(atoi(argv[2]), (bool)atoi(argv[3]));
 
-	std::cout << "elapsed process CPU time = " << (long long unsigned int)execTime << " nanoseconds\n";
+	std::cout << (long long unsigned int)execTime;
 
 	return 0;
 }

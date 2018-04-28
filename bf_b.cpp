@@ -86,41 +86,40 @@ public:
 			changed[i] = true;
 		
 		__itt_resume(); // Start measuring runtime here
-		//clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
+		clock_gettime(CLOCK_MONOTONIC_RAW, &tick);
 
 		
 		
 		omp_set_num_threads(numThreads);
-		for(auto i = 0; i < g.size_nodes() - 1; i++) {
-			#pragma omp parallel
-			{
-				int myID = omp_get_thread_num();
-				changed[myID] = false;
-				/* Execute Bellman Ford */
-				for(auto u = g.begin()+myID; u < g.end(); u+=numThreads) {
-					//cout << "Node: " << u << endl;
-					for(auto e = g.edge_begin(u); e < g.edge_end(u); e++) {
-						//cout << "Edge: " << e << endl;
-						graph::node_t v = g.get_edge_dst(e);
-						graph::edge_data_t weight = g.get_edge_data(e);
-						if(relaxEdge(u,v,e)) {
-							changed[myID] = true;
+
+		#pragma omp parallel
+		{
+			for(auto i = 0; i < g.size_nodes() - 1; i++) {
+					int myID = omp_get_thread_num();
+					changed[myID] = false;
+					/* Execute Bellman Ford */
+					for(auto u = g.begin()+myID; u < g.end(); u+=numThreads) {
+						//cout << "Node: " << u << endl;
+						for(auto e = g.edge_begin(u); e < g.edge_end(u); e++) {
+							//cout << "Edge: " << e << endl;
+							graph::node_t v = g.get_edge_dst(e);
+							graph::edge_data_t weight = g.get_edge_data(e);
+							if(relaxEdge(u,v,e)) {
+								changed[myID] = true;
+							}
 						}
 					}
+				bool stop = true;
+				for(int k = 0; k < numThreads; k++){
+					if(changed[k])
+						stop = false;
 				}
+				if(stop)
+					break;
 			}
-			bool stop = true;
-			for(int i = 0; i < numThreads; i++){
-				if(changed[i])
-					stop = false;
-			}
-			if(stop)
-				break;
 		}
-
-		__itt_pause(); //Stop measuring runtime here
-		//clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
-  		//execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
+		clock_gettime(CLOCK_MONOTONIC_RAW, &tock);
+  		execTime = 1000000000 * (tock.tv_sec - tick.tv_sec) + tock.tv_nsec - tick.tv_nsec;
 		
 		if (print)
 			printGraphDistances();

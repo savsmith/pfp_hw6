@@ -86,15 +86,13 @@ public:
 		for(auto i = 0; i < g.size_nodes() - 1; i++) {
 			changed = false;
 			/* Execute Bellman Ford */
-			for(auto u = g.begin(); u < g.end(); u++) {
-				//cout << "Node: " << u << endl;
-				for(auto e = g.edge_begin(u); e < g.edge_end(u); e++) {
-					//cout << "Edge: " << e << endl;
-					graph::node_t v = g.get_edge_dst(e);
-					graph::edge_data_t weight = g.get_edge_data(e);
-					if(relaxEdge(u,v,e)) {
-						changed = true;
-					}
+			for(auto e = g.edge_begin(); e < g.edge_end(); e++) {
+				//cout << "Edge: " << e << endl;
+				graph::node_t u = g.get_edge_src(e);
+				graph::node_t v = g.get_edge_dst(e);
+				graph::edge_data_t weight = g.get_edge_data(e);
+				if(relaxEdge(u,v,e)) {
+					changed = true;
 				}
 			}
 			if(!changed)
@@ -143,5 +141,6 @@ int main (int argc, char *argv[]) {
 
 	if(!((bool)atoi(argv[2])))
 		std::cout << (long long unsigned int)execTime;
+
 	return 0;
 }

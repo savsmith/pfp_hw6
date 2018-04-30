@@ -15,10 +15,9 @@ REMOVE_TARGETS = bf_a bf_b bf_c bf_e bf_d
 
 all: graph \
 	 bf_a \
-	 bf_b 
-	 #bf_c \
-	 #bf_d \
-	 #bf_e
+	 bf_b \
+	 bf_d \
+	 bf_e
 
 graph: graph.cpp graph.h
 	$(CC) graph.cpp -O3 -std=c++11 -g -c -o graph.o 
@@ -29,13 +28,10 @@ bf_a: graph.h graph.cpp bf_a.cpp
 bf_b: graph.h graph.cpp bf_b.cpp
 	$(CC) graph.o bf_b.cpp $(VTUNE) -O3 $(CFLAGS) -o bf_b $(VTUNE_LINK) $(LINKS)
 
-bf_c: graph.h graph.cpp
-	$(CC) graph.o bf_c.cpp $(VTUNE) -O3 $(CFLAGS) -o bf_c $(VTUNE_LINK) $(LINKS)
-
-bf_d: graph.h graph.cpp
+bf_d: graph.h graph.cpp bf_d.cpp
 	$(CC) graph.o bf_d.cpp $(VTUNE) -O3 $(CFLAGS) -o bf_d $(VTUNE_LINK) $(LINKS)
 
-bf_e: graph.h graph.cpp
+bf_e: graph.h graph.cpp bf_e.cpp
 	$(CC) graph.o bf_e.cpp $(VTUNE) -O3 $(CFLAGS) -o bf_e $(VTUNE_LINK) $(LINKS)
 
 clean:

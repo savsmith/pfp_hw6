@@ -77,7 +77,7 @@ std::vector<Edge> parse_dimacs(std::fstream& f_dimacs, int& num_nodes, int& num_
 }
 
 void gen_csr(std::vector<Edge>& edges,
-    graph::edge_t* edge_range, graph::node_t* edge_dst, graph::edge_data_t* edge_data,
+    graph::edge_t* edge_range, graph::node_t* edge_dst, graph::node_t* edge_src, graph::edge_data_t* edge_data,
     int num_nodes, int num_edges)
 {
   std::sort(edges.begin(), edges.end(),
@@ -95,6 +95,7 @@ void gen_csr(std::vector<Edge>& edges,
     }
     else {
       edge_dst[cur_edge] = e.dst;
+      edge_src[cur_edge] = e.src;
       edge_data[cur_edge] = e.weight;
       cur_edge++;
     }
@@ -108,7 +109,7 @@ void gen_csr(std::vector<Edge>& edges,
 }
 
 void gen_transposed_csr(std::vector<Edge>& edges,
-    graph::in_edge_t* in_edge_range, graph::node_t* in_edge_dst, graph::in_edge_data_t* in_edge_data,
+    graph::in_edge_t* in_edge_range, graph::node_t* in_edge_dst, graph::node_t* in_edge_src, graph::in_edge_data_t* in_edge_data,
     int num_nodes, int num_edges)
 {
   std::sort(edges.begin(), edges.end(),
@@ -125,6 +126,7 @@ void gen_transposed_csr(std::vector<Edge>& edges,
       in_edge_range[cur_node] = cur_edge;
     } else {
       in_edge_dst[cur_edge] = e.src;
+      in_edge_src[cur_edge] = e.dst;
       in_edge_data[cur_edge] = e.weight;
       cur_edge++;
     }
@@ -159,14 +161,16 @@ bool graph::construct_from_dimacs(const std::string dimacs_name) {
   in_edge_range = new in_edge_t [num_nodes+1];
 
   edge_dst = new node_t [num_edges+1];
+  edge_src = new node_t [num_edges+1];
   edge_data = new edge_data_t [num_edges+1];
   in_edge_dst = new node_t [num_edges+1];
+  in_edge_src = new node_t [num_edges+1];
   in_edge_data = new in_edge_data_t [num_edges+1];
 
   is_allocated = true;
 
-  gen_csr(edges, edge_range, edge_dst, edge_data, num_nodes, num_edges);
-  gen_transposed_csr(edges, in_edge_range, in_edge_dst, in_edge_data, num_nodes, num_edges);
+  gen_csr(edges, edge_range, edge_dst, edge_src, edge_data, num_nodes, num_edges);
+  gen_transposed_csr(edges, in_edge_range, in_edge_dst, in_edge_src, in_edge_data, num_nodes, num_edges);
 
   return true;
 }

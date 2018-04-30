@@ -145,7 +145,7 @@ public:
 int main (int argc, char *argv[]) {
 	// Ensure right number of arguments being used
 	if (argc < 4) {
-	    std::cerr << "Usage: " << argv[0] << " <input.dimacs> <thread_count> <print 0/1>\n";
+	    std::cerr << "Usage: " << argv[0] << " <input.dimacs> <thread_count> <print? 0/1>\n";
 	    return 0;
   	}
 
@@ -161,7 +161,8 @@ int main (int argc, char *argv[]) {
 	//std::cout << "Graph size: " << g.size_nodes() << std::endl;
 	uint64_t execTime = bf.serialBF(atoi(argv[2]), (bool)atoi(argv[3]));
 
-	std::cout << (long long unsigned int)execTime;
+	if(!((bool)atoi(argv[3])))
+		std::cout << (long long unsigned int)execTime;
 
 	return 0;
 }

@@ -1,0 +1,1 @@
+make: builds files bf_a bf_b bf_d bf_e (No C as that part is done by using export OMP_SCHEDULE)
